@@ -1,0 +1,23 @@
+{
+  "name": "clone_x_nodejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ERWANCEN/clone_x_nodejs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ERWANCEN/clone_x_nodejs/issues"
+  },
+  "homepage": "https://github.com/ERWANCEN/clone_x_nodejs#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
