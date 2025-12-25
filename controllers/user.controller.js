@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 // Get all users
 const getAll = async (req, res) => {
     try {
+        // Status admin verification
+        await checkAdmin(req.auth.id);
         const users = await ModelUser.find();
         res.status(200).json(users);
     } catch (error) {
@@ -62,6 +64,7 @@ const login = async (req, res) => {
 
 const deleteUser = async (req, res, next) => {
     try {
+        await checkAdmin(req.auth.id);
         const user = await ModelUser.findByIdAndDelete(req.params.id);
         if(!user) return res.status(404).json('User not found !');
         res.status(200).json('User deleted !');
@@ -72,6 +75,7 @@ const deleteUser = async (req, res, next) => {
 
 const updateUser = async (req, res, next) => {
     try {
+        await checkAdmin(req.auth.id);
         const user = await ModelUser.findByIdAndUpdate(
             req.params.id, 
             req.body, 
