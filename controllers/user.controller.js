@@ -1,8 +1,12 @@
+const createError = require('../middlewares/error');
 const ModelUser = require('../models/User.model');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const ENV = require('../config/env');
+const { checkAdmin } = require('../services/user.service');
 
 // Get all users
-const getAll = async (req, res) => {
+const getAll = async (req, res, next) => {
     try {
         // Status admin verification
         await checkAdmin(req.auth.id);
@@ -14,7 +18,7 @@ const getAll = async (req, res) => {
 }
 
 // Add a new user
-const register = async (req, res) => {
+const register = async (req, res, next) => {
     try {
         // "10" est le nombre de tours de salage
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -33,7 +37,7 @@ const register = async (req, res) => {
 }
 
 // User login
-const login = async (req, res) => {
+const login = async (req, res, next) => {
     try {
         // 1 - Recherche l utilisateur dans la base de données
         const user = await ModelUser.findOne({email: req.body.email});
@@ -47,6 +51,13 @@ const login = async (req, res) => {
 
         // 4 - Si le mot de passe est incorrect, renvoie une erreur 400
         if(!passwordComparison) return res.status(400).json('Wrong Credentials !');
+
+        // Créer un JWT (Json Web Token)
+        const token = jwt.sign(
+            { id: user._id },
+            ENV.TOKEN, 
+            { expiresIn: "24h" }
+        )
 
         const { password, ...others } = user._doc
 
