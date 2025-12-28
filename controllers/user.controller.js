@@ -1,5 +1,5 @@
 const createError = require('../middlewares/error');
-const ModelUser = require('../models/User.model');
+const ModelUser = require('../models/user.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const ENV = require('../config/env');

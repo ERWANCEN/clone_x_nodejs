@@ -1,4 +1,4 @@
-const ModelUser = require('../models/User.model');
+const ModelUser = require('../models/user.model');
 const createError = require('../middlewares/error');
 
 // Vérifie que l'utilisateur existe ET qu'il est admin
