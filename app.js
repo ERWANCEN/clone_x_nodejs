@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 // IMPORTS ROUTES
 const userRouter = require('./router/user.router');
 const messageRouter = require('./router/message.router');
+const tweetRouter = require('./router/tweet.router');
 
 // CONNEXION MONGO
 connectDB(ENV.MONGO_URI_LOCAL, ENV.DB_NAME);
@@ -19,6 +20,7 @@ app.use(express.json());
 // PREFIX
 app.use('/api/user', userRouter);
 app.use('/api/message', messageRouter);
+app.use('/api/tweet', tweetRouter);
 
 // MIDDLEWARE DE GESTION D'ERREURS
 app.use((error, req, res, next) => {
