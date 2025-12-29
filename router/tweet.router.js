@@ -10,5 +10,6 @@ router.put('/edit/:id', verifyToken, TweetController.editTweet);
 router.get('/myTweets', verifyToken, TweetController.getMyTweets);
 router.get('/fromUser/:id', verifyToken, TweetController.getTweetsFromUser);
 router.delete('/delete/:id', verifyToken, TweetController.deleteTweet);
+router.put('/like/:id', verifyToken, TweetController.likeTweet);
 
 module.exports = router;

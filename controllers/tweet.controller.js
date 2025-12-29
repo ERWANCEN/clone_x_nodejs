@@ -161,10 +161,58 @@ const deleteTweet = async (req, res, next) => {
     }
 }
 
+// Like or Unlike a tweet
+const likeTweet = async (req, res, next) => {
+    try {
+        const { id } = req.params; // Tweet's id
+        const userId = req.auth.id; // Id of the person who's liking
+        console.log(id);
+        console.log(userId);
+        
+
+        // We retrieve the tweet
+        const tweet = await ModelTweet.findById(id);
+
+        if (!tweet) {
+            return next(createError(404, "Tweet not found"));
+        }
+
+        // Has the user already liked it?
+        const isLiked = tweet.likes.includes(userId);
+
+        if (isLiked) {
+            // 1. Yes, the user already liked, so we remove it
+            // The ID is removed from the table
+            tweet.likes = tweet.likes.filter(id => id.toString() !== userId);
+            
+            // The counter is decremented (without going below 0)
+            tweet.stats.likes = Math.max(0, tweet.stats.likes - 1);
+            
+            await tweet.save();
+            res.status(200).json({ message: "Tweet unliked", stats: tweet.stats });
+        } else {
+            // 2. No, the user didn't like the Tweet yet
+            
+            // We're adding the id in the table
+            tweet.likes.push(userId);
+            
+            // We increment the counter
+            tweet.stats.likes += 1;
+            
+            await tweet.save();
+            res.status(200).json({ message: "Tweet liked", stats: tweet.stats });
+        }
+
+    } catch (error) {
+        next(createError(500, "Unable to like the tweet", error.message));
+    }
+}
+
 module.exports = {
     postTweet,
     editTweet,
     getMyTweets,
     getTweetsFromUser,
-    deleteTweet
+    deleteTweet,
+    likeTweet
 }
