@@ -27,6 +27,12 @@ const TweetSchema = mongoose.Schema(
             type: String
         }
     ],
+    likes: [
+        { 
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: "User" 
+        }
+    ],
     stats: {
         likes: { type: Number, default: 0 },
         retweets: { type: Number, default: 0 },
