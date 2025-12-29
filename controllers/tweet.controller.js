@@ -208,11 +208,134 @@ const likeTweet = async (req, res, next) => {
     }
 }
 
+// Adding a comment to a Tweet
+const postComment = async (req, res, next) => {
+    try {
+        const { id } = req.params; // Id of the Tweet to comment
+        const authorId = req.auth.id; 
+        const { text } = req.body;
+
+        if (!text) return next(createError(400, "The comment cannot be empty"));
+
+        // Does the Tweet exist?
+        const tweet = await ModelTweet.findById(id);
+        if (!tweet) return next(createError(404, "Tweet not found"));
+
+        // Creating the comment
+        const newComment = await ModelComment.create({
+            author: authorId,
+            tweetId: id,
+            text
+        });
+
+        // Update the comment counter
+        tweet.stats.comments += 1;
+        await tweet.save();
+
+        // Return author information
+        await newComment.populate('author', 'pseudo avatar');
+
+        res.status(201).json(newComment);
+    } catch (error) {
+        next(createError(500, "Unable to comment", error.message));
+    }
+}
+
+// Read comments on a tweet
+const getCommentsByTweet = async (req, res, next) => {
+    try {
+        const { id } = req.params; // Tweet's id
+
+        // We are looking for all comments that have this tweetId
+        const comments = await ModelComment.find({ tweetId: id })
+            .sort({ createdAt: -1 }) // Newest first
+            .populate('author', 'pseudo');
+
+        res.status(200).json(comments);
+    } catch (error) {
+        next(createError(500, "Unable to retrieve comments", error.message));
+    }
+}
+
+// Edit a comment
+const editComment = async (req, res, next) => {
+    try {
+        const { id } = req.params; // Comment's id
+        const userId = req.auth.id; // Token user id
+        const { text } = req.body; // New text
+
+        // Check that the text is not empty
+        if (!text || text.trim().length === 0) {
+            return next(createError(400, "The comment cannot be empty"));
+        }
+
+        // Search for the comment 
+        const commentToUpdate = await ModelComment.findById(id);
+
+        if (!commentToUpdate) {
+            return next(createError(404, "Comment not found"));
+        }
+
+        // Is it MY comment?
+        if (commentToUpdate.author.toString() !== userId) {
+            return next(createError(403, "You can only edit your own comments"));
+        }
+
+        // Update and save
+        commentToUpdate.text = text;
+        const updatedComment = await commentToUpdate.save();
+
+        res.status(200).json(updatedComment);
+    } catch (error) {
+        next(createError(500, "Unable to edit the comment", error.message));
+    }
+}
+
+// Delete a comment
+const deleteComment = async (req, res, next) => {
+    try {
+        const { id } = req.params; // Comment id
+        const userId = req.auth.id; // Token user id
+
+        // Search for the comment
+        const commentToDelete = await ModelComment.findById(id);
+
+        if (!commentToDelete) {
+            return next(createError(404, "Comment not found"));
+        }
+
+        // Is it MY comment?
+        if (commentToDelete.author.toString() !== userId) {
+            return next(createError(403, "You can only delete your own comments"));
+        }
+
+        // Update the parent Tweet's counter
+        const relatedTweet = await ModelTweet.findById(commentToDelete.tweetId);
+        
+        if (relatedTweet) {
+            // We decrement the counter (making sure it does not go negative)
+            relatedTweet.stats.comments = Math.max(0, relatedTweet.stats.comments - 1);
+            await relatedTweet.save();
+        }
+
+        // Delete the comment
+        await commentToDelete.deleteOne();
+
+        res.status(200).json({ message: "Comment deleted" });
+    } catch (error) {
+        next(createError(500, "Unable to delete the comment", error.message));
+    }
+}
+
 module.exports = {
     postTweet,
     editTweet,
     getMyTweets,
     getTweetsFromUser,
     deleteTweet,
-    likeTweet
+    likeTweet,
+    postComment,
+    getCommentsByTweet,
+    editComment,
+    deleteComment
 }
