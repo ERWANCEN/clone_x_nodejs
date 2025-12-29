@@ -86,7 +86,13 @@ const getMyTweets = async (req, res, next) => {
 
         const tweets = await ModelTweet.find({ author: currentUserId })
             .sort({ createdAt: -1 }) // Newest first
-            .populate('author', 'pseudo'); // Displays user information instead of just the ID
+            .populate('author', 'pseudo') // Displays user information instead of just the id
+
+            // If it's a retweet, fill in the information from the original tweet AND its author
+            .populate({
+                path: 'retweetedTweet', 
+                populate: { path: 'author', select: 'pseudo' }
+            });
 
         res.status(200).json(tweets);
     } catch (error) {
@@ -112,7 +118,13 @@ const getTweetsFromUser = async (req, res, next) => {
         // We are looking for the Tweets that have author == id
         const tweets = await ModelTweet.find({ author: id })
             .sort({ createdAt: -1 })
-            .populate('author', 'pseudo email'); // Display user's informations
+            .populate('author', 'pseudo email') // Display user's informations
+
+            // If it's a retweet, fill in the information from the original tweet AND its author
+            .populate({
+                path: 'retweetedTweet', 
+                populate: { path: 'author', select: 'pseudo' }
+            });
         
         console.log("2. Nombre de tweets trouvés :", tweets.length);
         if (tweets.length > 0) {
@@ -204,7 +216,7 @@ const likeTweet = async (req, res, next) => {
         }
 
     } catch (error) {
-        next(createError(500, "Unable to like the tweet", error.message));
+        next(createError(error.status || 500, "Unable to like the tweet", error.message));
     }
 }
 
@@ -237,7 +249,7 @@ const postComment = async (req, res, next) => {
 
         res.status(201).json(newComment);
     } catch (error) {
-        next(createError(500, "Unable to comment", error.message));
+        next(createError(error.status || 500, "Unable to comment", error.message));
     }
 }
 
@@ -253,7 +265,7 @@ const getCommentsByTweet = async (req, res, next) => {
 
         res.status(200).json(comments);
     } catch (error) {
-        next(createError(500, "Unable to retrieve comments", error.message));
+        next(createError(error.status || 500, "Unable to retrieve comments", error.message));
     }
 }
 
@@ -287,7 +299,7 @@ const editComment = async (req, res, next) => {
 
         res.status(200).json(updatedComment);
     } catch (error) {
-        next(createError(500, "Unable to edit the comment", error.message));
+        next(createError(error.status || 500, "Unable to edit the comment", error.message));
     }
 }
 
@@ -323,7 +335,53 @@ const deleteComment = async (req, res, next) => {
 
         res.status(200).json({ message: "Comment deleted" });
     } catch (error) {
-        next(createError(500, "Unable to delete the comment", error.message));
+        next(createError(error.status || 500, "Unable to delete the comment", error.message));
+    }
+}
+
+// Retweet or Cancel retweet
+const retweet = async (req, res, next) => {
+    try {
+        const { id } = req.params; // The id of the original tweet
+        const userId = req.auth.id; // Me
+
+        // Check if the original tweet exists
+        const originalTweet = await ModelTweet.findById(id);
+        if (!originalTweet) return next(createError(404, "Original tweet not found"));
+
+        // Have I already retweeted this tweet?
+        const existingRetweet = await ModelTweet.findOne({
+            author: userId,
+            retweetedTweet: id
+        });
+
+        if (existingRetweet) {
+            // 1. Undo retweet
+            
+            // The retweeted tweet is deleted
+            await existingRetweet.deleteOne();
+
+            // The counter for the original tweet is decremented
+            await ModelTweet.findByIdAndUpdate(id, { $inc: { 'stats.retweets': -1 } });
+
+            res.status(200).json({ message: "Retweet canceled" });
+
+        } else {
+            // 2. Create retweet
+            
+            // We create a new empty tweet, but with the reference
+            await ModelTweet.create({
+                author: userId,
+                retweetedTweet: id
+            });
+
+            // We increment the counter of the original tweet
+            await ModelTweet.findByIdAndUpdate(id, { $inc: { 'stats.retweets': 1 } });
+
+            res.status(201).json({ message: "Retweet successfully completed" });
+        }
+    } catch (error) {
+        next(createError(error.status || 500, "Unable to manage retweets", error.message));
     }
 }
 
@@ -337,5 +395,6 @@ module.exports = {
     postComment,
     getCommentsByTweet,
     editComment,
-    deleteComment
+    deleteComment,
+    retweet
 }
