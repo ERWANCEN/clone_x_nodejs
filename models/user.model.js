@@ -28,6 +28,10 @@ const UserSchema = mongoose.Schema(
       type: String, 
       required: true 
     },
+    stats: {
+        followers: { type: Number, default: 0 }, // Followers
+        following: { type: Number, default: 0 }  // The ones that I follow
+    }
   },
   { timestamps: { createdAt: true } }
 );
