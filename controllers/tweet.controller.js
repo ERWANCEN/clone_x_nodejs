@@ -412,6 +412,27 @@ const getFeed = async (req, res, next) => {
     }
 }
 
+// Retrieve the most popular tweets (Top Likes)
+const getPopularTweets = async (req, res, next) => {
+    try {
+        const tweets = await ModelTweet.find()
+            .sort({ 
+                'stats.likes': -1, // -1 = Descending
+                createdAt: -1 // In the event of a tie, the most recent
+            }) 
+            .limit(20) // We only take the first 20
+            .populate('author', 'pseudo') // The author is displayed
+            .populate({ // We also manage the display if it is a retweet
+                path: 'retweetedTweet',
+                populate: { path: 'author', select: 'pseudo' }
+            });
+
+        res.status(200).json(tweets);
+    } catch (error) {
+        next(createError(error.status || 500, "Unable to retrieve popular tweets", error.message));
+    }
+}
+
 module.exports = {
     postTweet,
     editTweet,
@@ -424,5 +445,6 @@ module.exports = {
     editComment,
     deleteComment,
     retweet,
-    getFeed
+    getFeed,
+    getPopularTweets
 }
