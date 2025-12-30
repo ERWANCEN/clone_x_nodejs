@@ -1,6 +1,7 @@
 const createError = require('../middlewares/error');
 const ModelTweet = require('../models/tweet.model');
 const ModelUser = require('../models/user.model');
+const ModelFollow = require('../models/follow.model');
 
 // Create a Tweet
 const postTweet = async (req, res, next) => {
@@ -96,7 +97,7 @@ const getMyTweets = async (req, res, next) => {
 
         res.status(200).json(tweets);
     } catch (error) {
-        next(createError(500, "Unable to retrieve your Tweets", error.message));
+        next(createError(error.status || 500, "Unable to retrieve your Tweets", error.message));
     }
 }
 
@@ -141,7 +142,7 @@ const getTweetsFromUser = async (req, res, next) => {
 
         res.status(200).json(tweets);
     } catch (error) {
-        next(createError(500, "Unable to retrieve tweets from this user", error.message));
+        next(createError(error.status || 500, "Unable to retrieve tweets from this user", error.message));
     }
 }
 
@@ -385,6 +386,34 @@ const retweet = async (req, res, next) => {
     }
 }
 
+// Retrieve the feed with the Tweets of the people I'm following 
+const getFeed = async (req, res, next) => {
+    try {
+        const userId = req.auth.id;
+
+        // Retrieve the ids of the people I follow
+        const followingDocs = await ModelFollow.find({ follower: userId });
+        
+        // We just extract the ids of the ‘following’ field, to create a table
+        const followingIds = followingDocs.map(doc => doc.following);
+
+        // Retrieve tweets whose author is IN ($in) this list
+        const tweets = await ModelTweet.find({ 
+            author: { $in: followingIds } 
+        })
+        .sort({ createdAt: -1 }) // From newest to oldest
+        .populate('author', 'pseudo') // Author's info
+        .populate({ // Information from the original tweet if it's a retweet
+            path: 'retweetedTweet', 
+            populate: { path: 'author', select: 'pseudo' }
+        });
+
+        res.status(200).json(tweets);
+    } catch (error) {
+        next(createError(error.status || 500, "Unable to load the feed", error.message));
+    }
+}
+
 module.exports = {
     postTweet,
     editTweet,
@@ -396,5 +425,6 @@ module.exports = {
     getCommentsByTweet,
     editComment,
     deleteComment,
-    retweet
+    retweet,
+    getFeed
 }
