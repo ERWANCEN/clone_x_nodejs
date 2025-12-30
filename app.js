@@ -9,6 +9,8 @@ const cookieParser = require('cookie-parser');
 const userRouter = require('./router/user.router');
 const messageRouter = require('./router/message.router');
 const tweetRouter = require('./router/tweet.router');
+const followRouter = require('./router/follow.router');
+const searchRouter = require('./router/search.router');
 
 // CONNEXION MONGO
 connectDB(ENV.MONGO_URI_LOCAL, ENV.DB_NAME);
@@ -21,6 +23,8 @@ app.use(express.json());
 app.use('/api/user', userRouter);
 app.use('/api/message', messageRouter);
 app.use('/api/tweet', tweetRouter);
+app.use('/api/follow', followRouter);
+app.use('/api/search', searchRouter);
 
 // MIDDLEWARE DE GESTION D'ERREURS
 app.use((error, req, res, next) => {

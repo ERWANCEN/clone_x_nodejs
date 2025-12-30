@@ -7,6 +7,10 @@ const TweetSchema = mongoose.Schema(
         ref: "User",
         required: true 
     },
+    retweetedTweet: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Tweet"
+    },
     text: { 
       type: String, 
       trim: true,
