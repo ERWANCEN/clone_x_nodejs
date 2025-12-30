@@ -412,55 +412,6 @@ const getFeed = async (req, res, next) => {
     }
 }
 
-// Adding a comment to a Tweet
-const postComment = async (req, res, next) => {
-    try {
-        const { id } = req.params; // Id of the Tweet to comment
-        const authorId = req.auth.id; 
-        const { text } = req.body;
-
-        if (!text) return next(createError(400, "The comment cannot be empty"));
-
-        // Does the Tweet exist?
-        const tweet = await ModelTweet.findById(id);
-        if (!tweet) return next(createError(404, "Tweet not found"));
-
-        // Creating the comment
-        const newComment = await ModelComment.create({
-            author: authorId,
-            tweetId: id,
-            text
-        });
-
-        // Update the comment counter
-        tweet.stats.comments += 1;
-        await tweet.save();
-
-        // Return author information
-        await newComment.populate('author', 'pseudo avatar');
-
-        res.status(201).json(newComment);
-    } catch (error) {
-        next(createError(500, "Unable to comment", error.message));
-    }
-}
-
-// Read comments on a tweet
-const getCommentsByTweet = async (req, res, next) => {
-    try {
-        const { id } = req.params; // Tweet's id
-
-        // We are looking for all comments that have this tweetId
-        const comments = await ModelComment.find({ tweetId: id })
-            .sort({ createdAt: -1 }) // Newest first
-            .populate('author', 'pseudo');
-
-        res.status(200).json(comments);
-    } catch (error) {
-        next(createError(500, "Unable to retrieve comments", error.message));
-    }
-}
-
 module.exports = {
     postTweet,
     editTweet,
