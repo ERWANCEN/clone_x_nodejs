@@ -36,6 +36,60 @@ const sendingMessage = async (req, res, next) => {
     }
 }
 
+// Check received messages
+const receivedMessages = async (req, res, next) => {
+    try {
+        const myId = req.auth.id;
+        const messages = await ModelMessage.find({ recipient: myId })
+            .populate('sender', 'pseudo') // Knowing who wrote to me
+            .sort({ createdAt: -1 }); // Newest to oldest
+
+        res.status(200).json(messages);
+    } catch (error) {
+        next(createError(error.status || 500, "Failed to get received messages", error.message));
+    }
+};
+
+// View my sent messages (outbox)
+const sentMessages = async (req, res, next) => {
+    try {
+        const myId = req.auth.id;
+        const messages = await ModelMessage.find({ sender: myId })
+            .populate('receiver', 'pseudo') // To know who I'm writing to
+            .sort({ createdAt: -1 });
+
+        res.status(200).json(messages);
+    } catch (error) {
+        next(createError(error.status || 500, "Failed to get sent messages", error.message));
+    }
+};
+
+// Private conversation
+const privateConversation = async (req, res, next) => {
+    try {
+        const myId = req.auth.id;
+        const otherUserId = req.params.id;
+
+        // The logic: I want messages where:
+        // (Sender = Me AND Recipient = The other person)
+        // OR
+        // (Sender = The other person AND Recipient = Me)
+        const messages = await ModelMessage.find({
+            $or: [
+                { sender: myId, recipient: otherUserId },
+                { sender: otherUserId, recipient: myId }
+            ]
+        })
+        .sort({ createdAt: 1 }) // Chronological (like a chat)
+        .populate('sender', 'pseudo')
+        .populate('recipient', 'pseudo');
+
+        res.status(200).json(messages);
+    } catch (error) {
+        next(createError(error.status || 500, "Failed to get conversation", error.message));
+    }
+};
+
 // Update a message
 const editMessage = async (req, res, next) => {
     try {
@@ -103,6 +157,9 @@ const deleteMessage = async (req, res, next) => {
 
 module.exports = {
     sendingMessage,
+    receivedMessages,
+    sentMessages,
+    privateConversation,
     editMessage,
     deleteMessage
 }
