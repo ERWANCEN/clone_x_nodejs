@@ -346,10 +346,10 @@ const replyToComment = async (req, res, next) => {
 
         // We are creating the response
         const newReply = await ModelComment.create({
-            content: req.body.content,
+            text: req.body.text,
             author: userId,
-            tweet: tweetId,        // We still link it the the main Tweet
-            replyTo: commentId     // We are linking it to the parent comment
+            tweetId: tweetId, // We still link it the the main Tweet
+            replyTo: commentId // We are linking it to the parent comment
         });
 
         res.status(201).json(newReply);
