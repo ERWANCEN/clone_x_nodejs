@@ -18,5 +18,6 @@ router.delete('/deleteComment/:id', verifyToken, TweetController.deleteComment);
 router.post('/retweet/:id', verifyToken, TweetController.retweet);
 router.get('/feed', verifyToken, TweetController.getFeed);
 router.get('/popular', verifyToken, TweetController.getPopularTweets);
+router.post('/:id/comment/:commentId/reply', verifyToken, tweetController.replyToComment);
 
 module.exports = router;

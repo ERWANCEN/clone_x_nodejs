@@ -17,6 +17,11 @@ const CommentSchema = mongoose.Schema(
       required: true,
       trim: true,
       maxLength: 280
+    },
+    replyTo: {
+        type: Schema.Types.ObjectId,
+        ref: 'Comment', // Reference to this same model
+        default: null // Null if it is a normal comment
     }
   },
   { timestamps: true }
