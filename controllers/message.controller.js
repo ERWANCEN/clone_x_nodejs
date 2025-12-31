@@ -40,7 +40,7 @@ const sendingMessage = async (req, res, next) => {
 const receivedMessages = async (req, res, next) => {
     try {
         const myId = req.auth.id;
-        const messages = await ModelMessage.find({ recipient: myId })
+        const messages = await ModelMessage.find({ receiver: myId })
             .populate('sender', 'pseudo') // Knowing who wrote to me
             .sort({ createdAt: -1 }); // Newest to oldest
 
@@ -71,18 +71,18 @@ const privateConversation = async (req, res, next) => {
         const otherUserId = req.params.id;
 
         // The logic: I want messages where:
-        // (Sender = Me AND Recipient = The other person)
+        // (Sender = Me AND receiver = The other person)
         // OR
-        // (Sender = The other person AND Recipient = Me)
+        // (Sender = The other person AND receiver = Me)
         const messages = await ModelMessage.find({
             $or: [
-                { sender: myId, recipient: otherUserId },
-                { sender: otherUserId, recipient: myId }
+                { sender: myId, receiver: otherUserId },
+                { sender: otherUserId, receiver: myId }
             ]
         })
         .sort({ createdAt: 1 }) // Chronological (like a chat)
         .populate('sender', 'pseudo')
-        .populate('recipient', 'pseudo');
+        .populate('receiver', 'pseudo');
 
         res.status(200).json(messages);
     } catch (error) {
