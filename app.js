@@ -1,12 +1,13 @@
 // Va contenir toutes les extensions et routers
 const express = require('express');
-const ENV = require('./config/env');
-require('dotenv').config();
-
-connectDB();
-const app = express();
-const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db_mongo');
+const cookieParser = require('cookie-parser');
+
+require('dotenv').config();
+connectDB();
+
+const ENV = require('./config/env');
+const app = express();
 
 // IMPORTS ROUTES
 const userRouter = require('./router/user.router');
@@ -14,9 +15,6 @@ const messageRouter = require('./router/message.router');
 const tweetRouter = require('./router/tweet.router');
 const followRouter = require('./router/follow.router');
 const searchRouter = require('./router/search.router');
-
-// CONNEXION MONGO
-connectDB(ENV.MONGO_URI_LOCAL, ENV.DB_NAME);
 
 // MIDDLEWARES
 app.use(cookieParser());
