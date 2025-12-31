@@ -20,7 +20,7 @@ const getAll = async (req, res, next) => {
 // Add a new user
 const register = async (req, res, next) => {
     try {
-        // "10" est le nombre de tours de salage
+        // “10” is the number of salting rounds
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
         const user = await ModelUser.create({
@@ -39,20 +39,19 @@ const register = async (req, res, next) => {
 // User login
 const login = async (req, res, next) => {
     try {
-        // 1 - Recherche l utilisateur dans la base de données
+        // Search for the user in the database
         const user = await ModelUser.findOne({email: req.body.email});
 
-        // 2 - Si l utilisateur n est pas trouvé, renvoie une erreur 404
+        // If the user is not found, return a 404 error
         if(!user) return res.status(404).json('User not found');
 
-        // 3 - Compare le mot de passe fourni dans la requête 
-        // Avec le mot de passe de l utilisateur qui est dans la bdd
+        // Compares the password provided in the request with the user's password stored in the database
         const passwordComparison = await bcrypt.compare(req.body.password, user.password);
 
-        // 4 - Si le mot de passe est incorrect, renvoie une erreur 400
-        if(!passwordComparison) return res.status(400).json('Wrong Credentials !');
+        // If the password is incorrect, returns a 400 error
+        if(!passwordComparison) return res.status(400).json('Wrong Credentials!');
 
-        // Créer un JWT (Json Web Token)
+        // Create a JWT (JSON Web Token)
         const token = jwt.sign(
             { id: user._id },
             ENV.TOKEN, 
