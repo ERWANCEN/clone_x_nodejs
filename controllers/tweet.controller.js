@@ -266,6 +266,12 @@ const editComment = async (req, res, next) => {
         const userId = req.auth.id; // Token user id
         const { text } = req.body; // New text
 
+        // Is it me?
+        if (userId !== id) {
+            // If it's not me, am I admin?
+            await checkAdmin(userId);
+        }
+
         // Check that the text is not empty
         if (!text || text.trim().length === 0) {
             return next(createError(400, "The comment cannot be empty"));
@@ -298,6 +304,12 @@ const deleteComment = async (req, res, next) => {
     try {
         const { id } = req.params; // Comment id
         const userId = req.auth.id; // Token user id
+
+        // Is it me?
+        if (userId !== id) {
+            // If it's not me, am I admin?
+            await checkAdmin(userId);
+        }
 
         // Search for the comment
         const commentToDelete = await ModelComment.findById(id);
