@@ -329,6 +329,35 @@ const deleteComment = async (req, res, next) => {
     }
 }
 
+// Add a comment to an other comment (respond)
+const replyToComment = async (req, res, next) => {
+    try {
+        const userId = req.auth.id; // The one that responds
+        const tweetId = req.params.id;       // Tweet's id
+        const commentId = req.params.commentId; // The id of the comment I'm reponding to
+
+        // We check that the Tweet exists
+        const tweet = await ModelTweet.findById(tweetId);
+        if (!tweet) return next(createError(404, "Tweet not found"));
+
+        // We check that the parent comment exists
+        const parentComment = await ModelComment.findById(commentId);
+        if (!parentComment) return next(createError(404, "Parent comment not found"));
+
+        // We are creating the response
+        const newReply = await ModelComment.create({
+            content: req.body.content,
+            author: userId,
+            tweet: tweetId,        // We still link it the the main Tweet
+            replyTo: commentId     // We are linking it to the parent comment
+        });
+
+        res.status(201).json(newReply);
+    } catch (error) {
+        next(createError(error.status || 500, "Failed to reply to comment", error.message));
+    }
+};
+
 // Retweet or Cancel retweet
 const retweet = async (req, res, next) => {
     try {
@@ -435,6 +464,7 @@ module.exports = {
     getCommentsByTweet,
     editComment,
     deleteComment,
+    replyToComment,
     retweet,
     getFeed,
     getPopularTweets
