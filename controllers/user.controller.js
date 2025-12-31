@@ -75,12 +75,23 @@ const login = async (req, res, next) => {
 
 const deleteUser = async (req, res, next) => {
     try {
-        await checkAdmin(req.auth.id);
+        const currentUserId = req.auth.id; // The connected user
+        const targetUserId = req.params.id; // The user to delete
+
+        // If I'm not deleting my account...
+        if (currentUserId !== targetUserId) {
+            // Then I should be an admin
+            await checkAdmin(currentUserId);
+        }
+
         const user = await ModelUser.findByIdAndDelete(req.params.id);
 
         if(!user) return res.status(404).json('User not found');
         
         res.status(200).json('User deleted');
+        if(!user) return res.status(404).json('User not found !');
+        
+        res.status(200).json('User deleted !');
     } catch (error) {
         next(createError(error.status || 500, "Failed to delete user", error.message));
     }
@@ -88,7 +99,12 @@ const deleteUser = async (req, res, next) => {
 
 const updateUser = async (req, res, next) => {
     try {
-        await checkAdmin(req.auth.id);
+        // Is it me?
+        if (req.auth.id !== req.params.id) {
+            // If it's not me, am I admin?
+            await checkAdmin(req.auth.id);
+        }
+
         const user = await ModelUser.findByIdAndUpdate(
             req.params.id, 
             req.body, 
@@ -96,6 +112,7 @@ const updateUser = async (req, res, next) => {
         );
 
         if(!user) return res.status(404).json('User not found');
+        if(!user) return res.status(404).json('User not found !');
 
         res.status(200).json(user);
     } catch (error) {
