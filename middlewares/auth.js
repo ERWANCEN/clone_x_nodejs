@@ -3,17 +3,17 @@ const createError = require('./error');
 const ENV = require('../config/env');
 
 const verifyToken = (req, res, next) => {
-    // Récupère le json (token) jwt à partir des cookies
+    // Retrieves the JWT JSON (token) from cookies
     const token = req.cookies.access_token;
 
     if (!token) return next(createError(401, "Access Denied"));
 
-    // Vérifie la validité du token en utilisant jwt.verify
+    // Verifies the validity of the token using jwt.verify
     jwt.verify(token, ENV.TOKEN, (err, user) => {
-        if(err) return next(createError(403, "Token non valide"));
+        if(err) return next(createError(403, "Invalid token"));
 
         /* 
-            Si la vérification réussit, on ajoute les informations de l'utilisateur dans l'objet "req.auth"
+            If the verification is successful, the user's information is added to the “req.auth” object.
         */
         req.auth = user;
 

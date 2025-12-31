@@ -43,7 +43,7 @@ const login = async (req, res, next) => {
         const user = await ModelUser.findOne({email: req.body.email});
 
         // 2 - Si l utilisateur n est pas trouvé, renvoie une erreur 404
-        if(!user) return res.status(404).json('USER NOT FOUND');
+        if(!user) return res.status(404).json('User not found');
 
         // 3 - Compare le mot de passe fourni dans la requête 
         // Avec le mot de passe de l utilisateur qui est dans la bdd
@@ -77,8 +77,10 @@ const deleteUser = async (req, res, next) => {
     try {
         await checkAdmin(req.auth.id);
         const user = await ModelUser.findByIdAndDelete(req.params.id);
-        if(!user) return res.status(404).json('User not found !');
-        res.status(200).json('User deleted !');
+
+        if(!user) return res.status(404).json('User not found');
+        
+        res.status(200).json('User deleted');
     } catch (error) {
         next(createError(error.status || 500, "Failed to delete user", error.message));
     }
@@ -92,7 +94,9 @@ const updateUser = async (req, res, next) => {
             req.body, 
             { new: true }
         );
-        if(!user) return res.status(404).json('User not found !');
+
+        if(!user) return res.status(404).json('User not found');
+
         res.status(200).json(user);
     } catch (error) {
         next(createError(error.status || 500, "Failed to update user", error.message));
