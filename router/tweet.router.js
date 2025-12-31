@@ -15,7 +15,7 @@ router.post('/comment/:id', verifyToken, TweetController.postComment);
 router.get('/comments/:id', verifyToken, TweetController.getCommentsByTweet);
 router.put('/editComment/:id', verifyToken, TweetController.editComment);
 router.delete('/deleteComment/:id', verifyToken, TweetController.deleteComment);
-router.post('/:id/comment/:commentId/reply', verifyToken, tweetController.replyToComment);
+router.post('/:id/comment/:commentId/reply', verifyToken, TweetController.replyToComment);
 router.post('/retweet/:id', verifyToken, TweetController.retweet);
 router.get('/feed', verifyToken, TweetController.getFeed);
 router.get('/popular', verifyToken, TweetController.getPopularTweets);
