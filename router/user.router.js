@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-// IMPORTATION DU CONTROLLER
-const UserController = require('../controllers/user.controller');
+// IMPORTING THE CONTROLLER
 const verifyToken = require('../middlewares/auth');
+const UserController = require('../controllers/user.controller');
 
 router.get('/all', verifyToken, UserController.getAll);
 router.post('/register', UserController.register);

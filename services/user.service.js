@@ -1,7 +1,7 @@
 const ModelUser = require('../models/user.model');
 const createError = require('../middlewares/error');
 
-// Vérifie que l'utilisateur existe ET qu'il est admin
+// Verify that the user exists AND that he is an admin
 const checkAdmin = async (userId) => {
     const user = await ModelUser.findById(userId);
 

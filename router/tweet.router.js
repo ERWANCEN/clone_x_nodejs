@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 // IMPORTING THE CONTROLLER
-const TweetController = require('../controllers/tweet.controller');
 const verifyToken = require('../middlewares/auth');
+const TweetController = require('../controllers/tweet.controller');
 
 router.post('/post', verifyToken, TweetController.postTweet);
 router.put('/edit/:id', verifyToken, TweetController.editTweet);

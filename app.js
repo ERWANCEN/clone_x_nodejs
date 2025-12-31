@@ -1,4 +1,4 @@
-// Va contenir toutes les extensions et routers
+// Will contain all extensions and routers
 const express = require('express');
 const connectDB = require('./config/db_mongo');
 const cookieParser = require('cookie-parser');
@@ -27,7 +27,7 @@ app.use('/api/tweet', tweetRouter);
 app.use('/api/follow', followRouter);
 app.use('/api/search', searchRouter);
 
-// MIDDLEWARE DE GESTION D'ERREURS
+// ERROR MANAGEMENT MIDDLEWARE
 app.use((error, req, res, next) => {
     const status = error.status || 500;
     const message = error.message || "Une erreur est survenue.";

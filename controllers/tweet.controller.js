@@ -107,9 +107,6 @@ const getTweetsFromUser = async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        console.log("--- DEBUG START ---");
-        console.log("1. ID recherché (depuis URL) :", id);
-
         // Does the user exist?
         const userExists = await ModelUser.exists({ _id: id });
 
@@ -127,12 +124,6 @@ const getTweetsFromUser = async (req, res, next) => {
                 path: 'retweetedTweet', 
                 populate: { path: 'author', select: 'pseudo' }
             });
-        
-        console.log("2. Nombre de tweets trouvés :", tweets.length);
-        if (tweets.length > 0) {
-            console.log("3. Exemple d'auteur du premier tweet trouvé :", tweets[0].author);
-        }
-        console.log("--- DEBUG END ---");
 
         // Does the user have any Tweets?
         if (!tweets || tweets.length === 0) {
@@ -244,7 +235,7 @@ const postComment = async (req, res, next) => {
         await tweet.save();
 
         // Return author information
-        await newComment.populate('author', 'pseudo avatar');
+        await newComment.populate('author', 'pseudo');
 
         res.status(201).json(newComment);
     } catch (error) {

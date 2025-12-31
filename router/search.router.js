@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+
+// IMPORTING THE CONTROLLER
 const verifyToken = require('../middlewares/auth');
 const SearchController = require('../controllers/search.controller');
 

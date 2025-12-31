@@ -1,16 +1,16 @@
 const createError = (status, message, details = null) => {
-    // crée une nouvelle instance d'erreur vide
+    // creates a new empty error instance
     const error = new Error();
     /* 
-        Définit le code d'état de l'erreur en fonction du paramètre "status"
+        Sets the error status code based on the “status” parameter
     */
     error.status = status;
     /* 
-        Définit le code d'état de l'erreur en fonction du paramètre "message"
+        Sets the error status code based on the “message” parameter
     */
     error.message = message;
     /* 
-        Permet d'ajouter des infos supplémentaires si besoin
+        Allows you to add additional information if necessary
     */
     error.details = details;
 

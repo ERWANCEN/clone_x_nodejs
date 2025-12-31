@@ -2,27 +2,26 @@ const mongoose = require("mongoose");
 
 const connectDB = async () => {
   try {
-    // Si déjà connecté, on ne fait rien (Optimisation Vercel)
+    // If already connected, do nothing (Vercel optimization)
     if (mongoose.connection.readyState === 1) {
       return;
     }
 
-    // On récupère l'URI depuis les variables d'environnement
-    // (Note: on enlève les arguments de la fonction pour simplifier)
+    // We retrieve the URI from the environment variables
     const uri = process.env.MONGO_URI;
     
     if (!uri) {
-        throw new Error("La variable MONGO_URI est manquante !");
+        throw new Error("The MONGO_URI variable is missing!");
     }
 
     await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 5000, // Timeout rapide (5s)
+      serverSelectionTimeoutMS: 5000, // Quick timeout (5s)
       socketTimeoutMS: 45000,
     });
 
-    console.log("MongoDB connecté avec succès !");
+    console.log("MongoDB successfully connected!");
   } catch (error) {
-    console.error("Erreur connexion MongoDB :", error);
+    console.error("MongoDB connection error:", error);
     throw error;
   }
 };
