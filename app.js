@@ -1,9 +1,12 @@
 // Va contenir toutes les extensions et routers
 const express = require('express');
-const connectDB = require('./config/db_mongo');
 const ENV = require('./config/env');
+require('dotenv').config();
+
+connectDB();
 const app = express();
 const cookieParser = require('cookie-parser');
+const connectDB = require('./config/db_mongo');
 
 // IMPORTS ROUTES
 const userRouter = require('./router/user.router');
