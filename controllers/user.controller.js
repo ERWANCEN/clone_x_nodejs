@@ -49,7 +49,7 @@ const login = async (req, res, next) => {
         const passwordComparison = await bcrypt.compare(req.body.password, user.password);
 
         // If the password is incorrect, returns a 400 error
-        if(!passwordComparison) return res.status(400).json('Wrong Credentials!');
+        if(!passwordComparison) return res.status(400).json('Wrong Credentials');
 
         // Create a JWT (JSON Web Token)
         const token = jwt.sign(
@@ -88,9 +88,6 @@ const deleteUser = async (req, res, next) => {
         if(!user) return res.status(404).json('User not found');
         
         res.status(200).json('User deleted');
-        if(!user) return res.status(404).json('User not found !');
-        
-        res.status(200).json('User deleted !');
     } catch (error) {
         next(createError(error.status || 500, "Failed to delete user", error.message));
     }
@@ -111,7 +108,6 @@ const updateUser = async (req, res, next) => {
         );
 
         if(!user) return res.status(404).json('User not found');
-        if(!user) return res.status(404).json('User not found !');
 
         res.status(200).json(user);
     } catch (error) {
